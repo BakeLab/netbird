@@ -197,15 +197,7 @@ func (m *Manager) buildPeerConfig(allHostPatterns []string) (string, error) {
 	config += "    PubkeyAuthentication yes\n"
 	config += "    BatchMode no\n"
 	config += fmt.Sprintf("    ProxyCommand %s ssh proxy %%h %%p\n", execPath)
-	config += "    StrictHostKeyChecking no\n"
 
-	if runtime.GOOS == "windows" {
-		config += "    UserKnownHostsFile NUL\n"
-	} else {
-		config += "    UserKnownHostsFile /dev/null\n"
-	}
-
-	config += "    CheckHostIP no\n"
 	config += "    LogLevel ERROR\n\n"
 
 	return config, nil
