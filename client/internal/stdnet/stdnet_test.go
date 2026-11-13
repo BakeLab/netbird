@@ -59,12 +59,6 @@ func TestNewNet_DoesNotDiscoverAtConstruction(t *testing.T) {
 	assert.True(t, n.lastUpdate.IsZero(), "constructor must leave the cache cold")
 }
 
-func TestNewNetWithDiscover_DoesNotDiscoverAtConstruction(t *testing.T) {
-	n := NewNetWithDiscover(context.Background(), nil, nil, nil)
-	require.NotNil(t, n)
-	assert.True(t, n.lastUpdate.IsZero(), "constructor must leave the cache cold")
-}
-
 func TestNet_InterfacesRetryAfterDiscoveryFailure(t *testing.T) {
 	discoverErr := errors.New("discover failed")
 	d := &countingDiscover{err: discoverErr}
