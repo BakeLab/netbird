@@ -59,12 +59,11 @@ func TestManager_SetupSSHClientConfig(t *testing.T) {
 	assert.Contains(t, configStr, "peer1.nb.internal")
 	assert.Contains(t, configStr, "peer2.nb.internal")
 
-	// Check platform-specific UserKnownHostsFile
-	if runtime.GOOS == "windows" {
-		assert.Contains(t, configStr, "UserKnownHostsFile NUL")
-	} else {
-		assert.Contains(t, configStr, "UserKnownHostsFile /dev/null")
-	}
+	// Keep OpenSSH's normal host-key verification defaults. NetBird must not
+	// silently disable checking or discard the user's known-hosts database.
+	assert.NotContains(t, configStr, "StrictHostKeyChecking no")
+	assert.NotContains(t, configStr, "UserKnownHostsFile")
+	assert.NotContains(t, configStr, "CheckHostIP no")
 }
 
 func TestGetSystemSSHConfigDir(t *testing.T) {
