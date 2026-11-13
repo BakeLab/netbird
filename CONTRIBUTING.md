@@ -113,7 +113,6 @@ The NetBird project monorepo keeps most of each component's code within its own 
 - [/client/firewall](/client/firewall) - Platform firewall backends (nftables, iptables, pf, WFP, userspace)
 - [/client/ssh](/client/ssh) - Built-in SSH server and client
 - [/client/ui](/client/ui) - NetBird agent UI code (Wails v3 + React)
-- [/client/android](/client/android), [/client/ios](/client/ios) - Mobile platform bindings
 - [/client/wasm](/client/wasm) - WebAssembly build of the agent
 - [/client/mdm](/client/mdm) - MDM-delivered policy handling
 - [/client/system](/client/system) - Host and system information collection
@@ -625,7 +624,7 @@ Choose the repository that owns the behavior you want to change:
 
 Read the target repository's README, contribution guide, agent instructions, templates, and workflows before starting. Tool versions, generators, test commands, licenses, contribution agreements, and sign-off requirements can differ. Use that repository's current instructions for setup and validation.
 
-Mobile applications combine platform-specific code with core NetBird components. Check the mobile repository's submodule, signing, and device-testing requirements alongside the relevant bindings under `client/android/` or `client/ios/` here.
+The BakeLab trim fork does not include the Android or iOS client bindings.
 
 For other integrations and packaging projects, browse the [NetBird organization](https://github.com/netbirdio) and check whether the project accepts contributions or is an archived repository, fork, or mirror. Coordinate [changes across repositories](#changes-across-repositories) when a shared contract is involved.
 
