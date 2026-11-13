@@ -197,6 +197,7 @@ func (s *SSHClient) Connect(host string, port int, user, password string) error 
 		HostKeyCallback: hostKeyCallback,
 		Timeout:         sshDialTimeout,
 	}
+	nbssh.ApplyStrongAlgorithms(clientConfig)
 	err = s.dialAndHandshake(gen, host, port, clientConfig)
 
 	// An unknown host key is a prompt, not a failure: return the marker intact

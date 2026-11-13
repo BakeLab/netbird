@@ -301,6 +301,7 @@ func Dial(ctx context.Context, addr, user string, opts DialOptions) (*Client, er
 		Timeout:         30 * time.Second,
 		HostKeyCallback: hostKeyCallback,
 	}
+	nbssh.ApplyStrongAlgorithms(config)
 
 	if opts.IdentityFile != "" {
 		authMethod, err := createSSHKeyAuth(opts.IdentityFile)

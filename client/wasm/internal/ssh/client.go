@@ -63,6 +63,7 @@ func (c *Client) Connect(host string, port int, username, jwtToken string, ipVer
 		HostKeyCallback: nbssh.CreateHostKeyCallback(c.nbClient),
 		Timeout:         sshDialTimeout,
 	}
+	nbssh.ApplyStrongAlgorithms(config)
 
 	network := "tcp"
 	switch ipVersion {
