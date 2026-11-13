@@ -16,8 +16,6 @@ import (
 
 	"github.com/pion/transport/v3"
 	"github.com/pion/transport/v3/stdnet"
-
-	"github.com/netbirdio/netbird/client/iface/netstack"
 )
 
 const (
@@ -46,25 +44,6 @@ type Net struct {
 	// resolver looks up the hosts given to ResolveUDPAddr and ResolveTCPAddr; nil
 	// means net.DefaultResolver.
 	resolver *net.Resolver
-}
-
-// NewNetWithDiscover creates a new StdNet instance.
-func NewNetWithDiscover(ctx context.Context, iFaceDiscover ExternalIFaceDiscover, disallowList []string, detector *WGDetector) *Net {
-	if ctx == nil {
-		ctx = context.Background()
-	}
-	n := &Net{
-		interfaceFilter: InterfaceFilter(disallowList, detector),
-		ctx:             ctx,
-	}
-	// current ExternalIFaceDiscover implement in android-client https://github.dev/netbirdio/android-client
-	// so in android cli use pionDiscover
-	if netstack.IsEnabled() {
-		n.iFaceDiscover = pionDiscover{}
-	} else {
-		n.iFaceDiscover = newMobileIFaceDiscover(iFaceDiscover)
-	}
-	return n
 }
 
 // NewNet creates a new StdNet instance.
