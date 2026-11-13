@@ -23,6 +23,7 @@ import (
 
 	"github.com/netbirdio/netbird/client/iface/wgaddr"
 	"github.com/netbirdio/netbird/client/iface/wgbackend"
+	nbssh "github.com/netbirdio/netbird/client/ssh"
 	sshauth "github.com/netbirdio/netbird/client/ssh/auth"
 	"github.com/netbirdio/netbird/client/ssh/detection"
 	"github.com/netbirdio/netbird/shared/auth"
@@ -1030,10 +1031,11 @@ func (s *Server) createSSHServer(addr net.Addr) (*ssh.Server, error) {
 		HandshakeTimeout: s.handshakeTimeout,
 		Version:          serverVersion,
 	}
+	server.ServerConfigCallback = func(ctx ssh.Context) *cryptossh.ServerConfig { return strongServerConfig(ctx, false) }
 
 	if s.jwtEnabled {
 		server.PasswordHandler = s.passwordHandler
-		server.ServerConfigCallback = trackPreAuthConn
+		server.ServerConfigCallback = func(ctx ssh.Context) *cryptossh.ServerConfig { return strongServerConfig(ctx, true) }
 	}
 
 	hostKeyPEM := ssh.HostKeyPEM(s.hostKeyPEM)
@@ -1047,12 +1049,15 @@ func (s *Server) createSSHServer(addr net.Addr) (*ssh.Server, error) {
 
 // trackPreAuthConn stores the connection being authenticated in its context, which gives
 // passwordHandler the user name of the auth request it is handling.
-func trackPreAuthConn(ctx ssh.Context) *cryptossh.ServerConfig {
-	return &cryptossh.ServerConfig{
-		PreAuthConnCallback: func(conn cryptossh.ServerPreAuthConn) {
+func strongServerConfig(ctx ssh.Context, trackPreAuth bool) *cryptossh.ServerConfig {
+	config := &cryptossh.ServerConfig{}
+	nbssh.ApplyStrongAlgorithmsToServer(config)
+	if trackPreAuth {
+		config.PreAuthConnCallback = func(conn cryptossh.ServerPreAuthConn) {
 			ctx.SetValue(preAuthConnKey{}, conn)
-		},
+		}
 	}
+	return config
 }
 
 func (s *Server) storeRemoteForwardListener(key forwardKey, ln net.Listener) {

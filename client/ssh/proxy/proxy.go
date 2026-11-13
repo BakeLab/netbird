@@ -601,6 +601,7 @@ func (p *SSHProxy) dialBackend(ctx context.Context, addr, user, jwtToken string)
 		Timeout:         sshHandshakeTimeout,
 		HostKeyCallback: p.verifyHostKey,
 	}
+	nbssh.ApplyStrongAlgorithms(config)
 
 	dialer := &net.Dialer{
 		Timeout: sshConnectionTimeout,
