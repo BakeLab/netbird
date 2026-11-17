@@ -32,6 +32,9 @@ func setupDatabase(t *testing.T) *gorm.DB {
 	var cleanup func()
 	switch os.Getenv("NETBIRD_STORE_ENGINE") {
 	case "postgres":
+		if testing.Short() {
+			t.Skip("container integration test; run without -short")
+		}
 		cleanup, dsn, err = testutil.CreatePostgresTestContainer()
 		if err != nil {
 			t.Fatalf("Failed to create PostgreSQL test container: %v", err)

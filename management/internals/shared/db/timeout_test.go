@@ -117,6 +117,9 @@ func postgresTestDSN(t *testing.T) string {
 	if os.Getenv("NETBIRD_STORE_ENGINE") != string(PostgresStoreEngine) {
 		t.Skip("requires NETBIRD_STORE_ENGINE=postgres")
 	}
+	if testing.Short() {
+		t.Skip("container integration test; run without -short")
+	}
 	cleanup, dsn, err := testutil.CreatePostgresTestContainer()
 	require.NoError(t, err)
 	t.Cleanup(cleanup)

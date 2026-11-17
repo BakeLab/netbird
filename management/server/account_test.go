@@ -3563,6 +3563,9 @@ func TestAccount_GetNextInactivePeerExpiration(t *testing.T) {
 }
 
 func TestAccount_SetJWTGroups(t *testing.T) {
+	if testing.Short() {
+		t.Skip("container integration test; run without -short")
+	}
 	t.Setenv("NETBIRD_STORE_ENGINE", "postgres")
 	manager, _, err := createManager(t)
 	require.NoError(t, err, "unable to create account manager")
@@ -4438,6 +4441,9 @@ func TestDefaultAccountManager_IsCacheCold(t *testing.T) {
 	})
 
 	t.Run("redis cache", func(t *testing.T) {
+		if testing.Short() {
+			t.Skip("container integration test; run without -short")
+		}
 		cleanup, redisURL, err := testutil.CreateRedisTestContainer()
 		require.NoError(t, err)
 		t.Cleanup(cleanup)

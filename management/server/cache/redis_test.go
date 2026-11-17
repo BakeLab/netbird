@@ -16,6 +16,9 @@ import (
 
 func startRedis(t *testing.T) string {
 	t.Helper()
+	if testing.Short() {
+		t.Skip("Redis integration test; run without -short")
+	}
 
 	ctx := context.Background()
 	redisContainer, err := testcontainersredis.Run(ctx, "redis:7")

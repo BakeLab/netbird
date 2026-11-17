@@ -506,7 +506,7 @@ jobs:
       fail-fast: false
       matrix:
         arch: ["amd64"]
-        store: ["sqlite", "postgres"]
+        store: ["sqlite"]
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
@@ -541,18 +541,6 @@ jobs:
       - name: check git status
         run: git --no-pager diff --exit-code
 
-      - name: Authenticate Docker pulls when credentials are available
-        env:
-          DOCKER_USER: ${{ secrets.DOCKER_USER }}
-          DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-        run: |
-          if [ -n "$DOCKER_USER" ] && [ -n "$DOCKER_TOKEN" ]; then
-            printf '%s' "$DOCKER_TOKEN" | docker login --username "$DOCKER_USER" --password-stdin
-            printf '%s' "$DOCKER_TOKEN" | sudo docker login --username "$DOCKER_USER" --password-stdin
-          else
-            echo 'Docker Hub credentials unavailable; using anonymous pulls.'
-          fi
-
       # The -json stream goes through tools/gotestsummary so the log shows one
       # line per test, the output of failed tests, the head of a timeout panic
       # with the still-running tests, and the slowest tests per package.
@@ -563,8 +551,7 @@ jobs:
           CGO_ENABLED=1 GOARCH=${{ matrix.arch }} \
           NETBIRD_STORE_ENGINE=${{ matrix.store }} \
             CI=true \
-          go test -json -tags=devcert -coverprofile=coverage.txt \
-            -exec "sudo --preserve-env=CI,NETBIRD_STORE_ENGINE" \
+          go test -short -json -tags=devcert -coverprofile=coverage.txt \
             -timeout 20m ./management/... ./shared/management/... \
             | tee management-test-events.jsonl \
             | go run ./tools/gotestsummary

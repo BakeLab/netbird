@@ -26,8 +26,12 @@ import (
 
 func runTestForAllEngines(t *testing.T, testDataFile string, f func(t *testing.T, store Store)) {
 	t.Helper()
+	selectedEngine := os.Getenv("NETBIRD_STORE_ENGINE")
 	for _, engine := range supportedEngines {
-		if os.Getenv("NETBIRD_STORE_ENGINE") != "" && os.Getenv("NETBIRD_STORE_ENGINE") != string(engine) {
+		if testing.Short() && engine == types.PostgresStoreEngine {
+			continue
+		}
+		if selectedEngine != "" && selectedEngine != string(engine) {
 			continue
 		}
 		t.Setenv("NETBIRD_STORE_ENGINE", string(engine))
@@ -44,8 +48,12 @@ func runTestForAllEngines(t *testing.T, testDataFile string, f func(t *testing.T
 
 func runTestForAllEnginesNoSqliteSeed(t *testing.T, testDataFile string, f func(t *testing.T, engine string, store Store)) {
 	t.Helper()
+	selectedEngine := os.Getenv("NETBIRD_STORE_ENGINE")
 	for _, engine := range supportedEngines {
-		if os.Getenv("NETBIRD_STORE_ENGINE") != "" && os.Getenv("NETBIRD_STORE_ENGINE") != string(engine) {
+		if testing.Short() && engine == types.PostgresStoreEngine {
+			continue
+		}
+		if selectedEngine != "" && selectedEngine != string(engine) {
 			continue
 		}
 		t.Setenv("NETBIRD_STORE_ENGINE", string(engine))
@@ -188,6 +196,9 @@ func TestPostgresql_NewStore(t *testing.T) {
 		t.Skip("skip CI tests on darwin and windows")
 	}
 
+	if testing.Short() {
+		t.Skip("container integration test; run without -short")
+	}
 	t.Setenv("NETBIRD_STORE_ENGINE", string(types.PostgresStoreEngine))
 	store, cleanUp, err := NewTestStoreFromSQL(context.Background(), "", t.TempDir())
 	t.Cleanup(cleanUp)

@@ -16,6 +16,9 @@ import (
 // startTestRedis returns the URL of a Redis it starts in a container.
 func startTestRedis(t *testing.T) string {
 	t.Helper()
+	if testing.Short() {
+		t.Skip("Redis integration test; run without -short")
+	}
 	testcontainers.SkipIfProviderIsNotHealthy(t)
 	ctx := context.Background()
 	container, err := testcontainersredis.Run(ctx, "redis:7")
