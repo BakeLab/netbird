@@ -22,16 +22,19 @@ jobs:
           NETBIRD_STORE_ENGINE: ${{ matrix.store }}
           CGO_ENABLED: '1'
           CI: 'true'
+          GIT_BRANCH: ${{ github.ref_name }}
         run: go test -tags=devcert -timeout 20m ./management/... ./shared/management/...
       - name: Benchmark full Management suite
         env:
           NETBIRD_STORE_ENGINE: ${{ matrix.store }}
           CGO_ENABLED: '1'
           CI: 'true'
+          GIT_BRANCH: ${{ github.ref_name }}
         run: go test -tags=devcert -run='^$' -bench=. -timeout 20m ./management/... ./shared/management/...
       - name: Benchmark HTTP APIs
         env:
           NETBIRD_STORE_ENGINE: ${{ matrix.store }}
           CGO_ENABLED: '1'
           CI: 'true'
+          GIT_BRANCH: ${{ github.ref_name }}
         run: go test -tags=benchmark -run='^$' -bench=. -timeout 20m ./management/server/http/...
