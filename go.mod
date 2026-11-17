@@ -48,7 +48,7 @@ require (
 	github.com/creack/pty v1.1.24
 	github.com/crowdsecurity/crowdsec v1.7.8
 	github.com/crowdsecurity/go-cs-bouncer v0.0.21
-	github.com/docker/docker v28.0.1+incompatible
+	github.com/docker/docker v28.5.2+incompatible
 	github.com/docker/go-connections v0.7.0
 	github.com/ebitengine/purego v0.10.0
 	github.com/eko/gocache/lib/v4 v4.2.0
