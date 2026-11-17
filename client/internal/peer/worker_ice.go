@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/netbirdio/ice/v4"
+	"github.com/BakeLab/ice/v4"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/netbirdio/netbird/client/iface"

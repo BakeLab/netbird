@@ -3,7 +3,7 @@ package stdnet
 import (
 	"net"
 
-	"github.com/pion/transport/v3"
+	"github.com/pion/transport/v4"
 )
 
 type pionDiscover struct {

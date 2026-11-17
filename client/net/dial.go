@@ -7,7 +7,7 @@ import (
 	"net"
 	"sync"
 
-	"github.com/pion/transport/v3"
+	"github.com/pion/transport/v4"
 	log "github.com/sirupsen/logrus"
 )
 

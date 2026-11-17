@@ -12,7 +12,7 @@ import (
 	"sync"
 
 	"github.com/pion/stun/v3"
-	"github.com/pion/transport/v3"
+	"github.com/pion/transport/v4"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/ipv6"
 

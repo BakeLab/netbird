@@ -9,10 +9,10 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/netbirdio/ice/v4"
+	"github.com/BakeLab/ice/v4"
 	"github.com/pion/logging"
 	"github.com/pion/stun/v3"
-	"github.com/pion/transport/v3"
+	"github.com/pion/transport/v4"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/netbirdio/netbird/client/internal/stdnet"
