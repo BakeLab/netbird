@@ -17,8 +17,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/BakeLab/ice/v4"
 	"github.com/hashicorp/go-multierror"
-	"github.com/netbirdio/ice/v4"
 	"github.com/pion/stun/v3"
 	log "github.com/sirupsen/logrus"
 	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"

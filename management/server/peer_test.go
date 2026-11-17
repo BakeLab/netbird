@@ -2242,6 +2242,9 @@ func Test_IsUniqueConstraintError(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			if testing.Short() && tt.engine == types.PostgresStoreEngine {
+				t.Skip("Postgres integration test; run without -short")
+			}
 			t.Setenv("NETBIRD_STORE_ENGINE", string(tt.engine))
 			s, cleanup, err := store.NewTestStoreFromSQL(context.Background(), "testdata/extended-store.sql", t.TempDir())
 			if err != nil {

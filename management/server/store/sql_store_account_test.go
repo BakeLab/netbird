@@ -567,6 +567,9 @@ func TestPostgresql_SaveAccount(t *testing.T) {
 		t.Skip("skip CI tests on darwin and windows")
 	}
 
+	if testing.Short() {
+		t.Skip("container integration test; run without -short")
+	}
 	t.Setenv("NETBIRD_STORE_ENGINE", string(types.PostgresStoreEngine))
 	store, cleanUp, err := NewTestStoreFromSQL(context.Background(), "", t.TempDir())
 	t.Cleanup(cleanUp)
@@ -642,6 +645,9 @@ func TestPostgresql_DeleteAccount(t *testing.T) {
 		t.Skip("skip CI tests on darwin and windows")
 	}
 
+	if testing.Short() {
+		t.Skip("container integration test; run without -short")
+	}
 	t.Setenv("NETBIRD_STORE_ENGINE", string(types.PostgresStoreEngine))
 	store, cleanUp, err := NewTestStoreFromSQL(context.Background(), "", t.TempDir())
 	t.Cleanup(cleanUp)
@@ -719,6 +725,9 @@ func TestPostgresql_TestGetAccountByPrivateDomain(t *testing.T) {
 		t.Skip("skip CI tests on darwin and windows")
 	}
 
+	if testing.Short() {
+		t.Skip("container integration test; run without -short")
+	}
 	t.Setenv("NETBIRD_STORE_ENGINE", string(types.PostgresStoreEngine))
 	store, cleanUp, err := NewTestStoreFromSQL(context.Background(), "../testdata/store.sql", t.TempDir())
 	t.Cleanup(cleanUp)

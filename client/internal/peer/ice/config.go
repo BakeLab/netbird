@@ -1,7 +1,7 @@
 package ice
 
 import (
-	"github.com/netbirdio/ice/v4"
+	"github.com/BakeLab/ice/v4"
 
 	"github.com/netbirdio/netbird/client/internal/stdnet"
 )

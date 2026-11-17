@@ -44,6 +44,9 @@ func TestPostgresql_GetAccount_LoadsCustomDomains(t *testing.T) {
 		t.Skip("skip CI tests on darwin and windows")
 	}
 
+	if testing.Short() {
+		t.Skip("container integration test; run without -short")
+	}
 	t.Setenv("NETBIRD_STORE_ENGINE", string(types.PostgresStoreEngine))
 	store, cleanup, err := NewTestStoreFromSQL(context.Background(), "", t.TempDir())
 	require.NoError(t, err)

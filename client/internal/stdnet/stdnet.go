@@ -14,8 +14,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/pion/transport/v3"
-	"github.com/pion/transport/v3/stdnet"
+	"github.com/pion/transport/v4"
+	"github.com/pion/transport/v4/stdnet"
 )
 
 const (
@@ -45,6 +45,8 @@ type Net struct {
 	// means net.DefaultResolver.
 	resolver *net.Resolver
 }
+
+var _ transport.Net = (*Net)(nil)
 
 // NewNet creates a new StdNet instance.
 func NewNet(ctx context.Context, disallowList []string, detector *WGDetector) *Net {

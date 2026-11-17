@@ -26,6 +26,9 @@ func TestNewIDPCacheManagers(t *testing.T) {
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
 			if tc.redis {
+				if testing.Short() {
+					t.Skip("container integration test; run without -short")
+				}
 				cleanup, redisURL, err := testutil.CreateRedisTestContainer()
 				if err != nil {
 					t.Fatalf("couldn't start redis container: %s", err)

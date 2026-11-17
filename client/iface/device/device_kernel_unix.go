@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/pion/transport/v3"
+	"github.com/pion/transport/v4"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/netbirdio/netbird/client/iface/configurer"

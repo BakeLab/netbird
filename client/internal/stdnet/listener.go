@@ -4,7 +4,7 @@ import (
 	"context"
 	"net"
 
-	"github.com/pion/transport/v3"
+	"github.com/pion/transport/v4"
 
 	nbnet "github.com/netbirdio/netbird/client/net"
 )

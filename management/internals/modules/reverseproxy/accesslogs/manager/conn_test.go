@@ -104,6 +104,9 @@ func TestOpenConn_PostgresReusesMainDSNWithItsOwnPool(t *testing.T) {
 		t.Skip("requires NETBIRD_STORE_ENGINE=postgres")
 	}
 	unsetStoreEnv(t)
+	if testing.Short() {
+		t.Skip("container integration test; run without -short")
+	}
 	cleanup, dsn, err := testutil.CreatePostgresTestContainer()
 	require.NoError(t, err)
 	t.Cleanup(cleanup)

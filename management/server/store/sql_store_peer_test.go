@@ -1567,6 +1567,9 @@ func TestSqlStore_ReRegisterPeers(t *testing.T) {
 }
 
 func TestPostgresTestStoreCopiesLivenessTables(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Postgres integration test; run without -short")
+	}
 	if engine := os.Getenv("NETBIRD_STORE_ENGINE"); engine != "" && engine != string(types.PostgresStoreEngine) {
 		t.Skip("exercises the copy into the postgres test store")
 	}

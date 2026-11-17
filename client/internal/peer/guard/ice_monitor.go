@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/netbirdio/ice/v4"
+	"github.com/BakeLab/ice/v4"
 	log "github.com/sirupsen/logrus"
 
 	icemaker "github.com/netbirdio/netbird/client/internal/peer/ice"

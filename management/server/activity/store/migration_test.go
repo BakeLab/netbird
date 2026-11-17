@@ -22,6 +22,9 @@ const (
 func setupDatabase(t *testing.T) *gorm.DB {
 	t.Helper()
 
+	if testing.Short() {
+		t.Skip("container integration test; run without -short")
+	}
 	cleanup, dsn, err := testutil.CreatePostgresTestContainer()
 	require.NoError(t, err, "Failed to create Postgres test container")
 	t.Cleanup(cleanup)

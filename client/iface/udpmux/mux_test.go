@@ -7,7 +7,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/pion/transport/v3"
+	"github.com/pion/transport/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

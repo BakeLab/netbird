@@ -35,7 +35,7 @@ func (s *SqlStore) GetProxyMetrics(ctx context.Context) (ProxyMetrics, error) {
 				"COUNT(DISTINCT CASE WHEN account_id IS NOT NULL THEN cluster_address END) AS clusters_byop, "+
 				"COUNT(DISTINCT CASE WHEN private = ? THEN cluster_address END) AS clusters_private, "+
 				"COUNT(*) AS proxies, "+
-				"COUNT(CASE WHEN status = ? AND last_seen > ? THEN 1 END) AS proxies_connected",
+				"COUNT(CASE WHEN status = ? AND "+s.proxyLastSeenComparison(">")+" THEN 1 END) AS proxies_connected",
 			true,
 			proxy.StatusConnected,
 			activeCutoff,
@@ -190,7 +190,7 @@ func (s *SqlStore) GetActiveProxyClusterAddresses(ctx context.Context) ([]string
 
 	result := s.db.
 		Model(&proxy.Proxy{}).
-		Where("account_id IS NULL AND status = ? AND last_seen > ?", proxy.StatusConnected, time.Now().Add(-proxyActiveThreshold)).
+		Where("account_id IS NULL AND status = ? AND "+s.proxyLastSeenComparison(">"), proxy.StatusConnected, time.Now().Add(-proxyActiveThreshold)).
 		Distinct("cluster_address").
 		Pluck("cluster_address", &addresses)
 
@@ -207,7 +207,7 @@ func (s *SqlStore) GetActiveProxyClusterAddressesForAccount(ctx context.Context,
 
 	result := s.db.
 		Model(&proxy.Proxy{}).
-		Where("account_id = ? AND status = ? AND last_seen > ?", accountID, proxy.StatusConnected, time.Now().Add(-proxyActiveThreshold)).
+		Where("account_id = ? AND status = ? AND "+s.proxyLastSeenComparison(">"), accountID, proxy.StatusConnected, time.Now().Add(-proxyActiveThreshold)).
 		Distinct("cluster_address").
 		Pluck("cluster_address", &addresses)
 
@@ -254,7 +254,7 @@ func (s *SqlStore) HasActiveProxyAtClusterAddress(ctx context.Context, clusterAd
 	var count int64
 	result := s.db.
 		Model(&proxy.Proxy{}).
-		Where("LOWER(cluster_address) = LOWER(?) AND status = ? AND last_seen > ?", clusterAddress, proxy.StatusConnected, time.Now().Add(-proxyActiveThreshold)).
+		Where("LOWER(cluster_address) = LOWER(?) AND status = ? AND "+s.proxyLastSeenComparison(">"), clusterAddress, proxy.StatusConnected, time.Now().Add(-proxyActiveThreshold)).
 		Count(&count)
 	if result.Error != nil {
 		log.WithContext(ctx).Errorf("failed to count active proxies at cluster address: %v", result.Error)
@@ -337,10 +337,10 @@ func (s *SqlStore) GetProxyClusters(ctx context.Context, accountID string) ([]pr
 				// COUNT(CASE WHEN ... THEN 1 END) counts only non-NULL — i.e. only
 				// rows that satisfy the predicate — so it works portably across
 				// sqlite and postgres without dialect-specific FILTER syntax.
-				"COUNT(CASE WHEN status = ? AND last_seen > ? THEN 1 END) AS connected_proxies, "+
+				"COUNT(CASE WHEN status = ? AND "+s.proxyLastSeenComparison(">")+" THEN 1 END) AS connected_proxies, "+
 				// MAX(CASE …) > 0 expresses BOOL_OR in a way Postgres tolerates
 				// (Postgres can't MAX a boolean column).
-				"MAX(CASE WHEN status = ? AND last_seen > ? THEN 1 ELSE 0 END) > 0 AS online, "+
+				"MAX(CASE WHEN status = ? AND "+s.proxyLastSeenComparison(">")+" THEN 1 ELSE 0 END) > 0 AS online, "+
 				"MAX(CASE WHEN account_id IS NOT NULL THEN 1 ELSE 0 END) > 0 AS account_owned",
 			proxy.StatusConnected, activeCutoff,
 			proxy.StatusConnected, activeCutoff,
@@ -424,7 +424,7 @@ func (s *SqlStore) GetActiveProxyVersions(ctx context.Context, clusterAddr strin
 	var versions []string
 	err := s.db.WithContext(ctx).
 		Model(&proxy.Proxy{}).
-		Where("LOWER(cluster_address) = LOWER(?) AND status = ? AND last_seen > ?",
+		Where("LOWER(cluster_address) = LOWER(?) AND status = ? AND "+s.proxyLastSeenComparison(">"),
 			clusterAddr, proxy.StatusConnected, time.Now().Add(-proxyActiveThreshold)).
 		Pluck("version", &versions).Error
 	if err != nil {
@@ -456,7 +456,7 @@ func (s *SqlStore) getClusterUnanimousCapability(ctx context.Context, clusterAdd
 		Select("COUNT(*) AS total, "+
 			"COUNT(CASE WHEN "+column+" IS NOT NULL THEN 1 END) AS reported, "+
 			"COUNT(*) > 0 AND COUNT(*) = COUNT(CASE WHEN "+column+" = true THEN 1 END) AS all_true").
-		Where("cluster_address = ? AND status = ? AND last_seen > ?",
+		Where("cluster_address = ? AND status = ? AND "+s.proxyLastSeenComparison(">"),
 			clusterAddr, "connected", time.Now().Add(-proxyActiveThreshold)).
 		Scan(&result).Error
 	if err != nil {
@@ -498,7 +498,7 @@ func (s *SqlStore) getClusterCapability(ctx context.Context, clusterAddr, column
 		Model(&proxy.Proxy{}).
 		Select("COUNT(CASE WHEN "+column+" IS NOT NULL THEN 1 END) > 0 AS has_capability, "+
 			"COALESCE(MAX(CASE WHEN "+column+" = true THEN 1 ELSE 0 END), 0) = 1 AS any_true").
-		Where("cluster_address = ? AND status = ? AND last_seen > ?",
+		Where("cluster_address = ? AND status = ? AND "+s.proxyLastSeenComparison(">"),
 			clusterAddr, "connected", time.Now().Add(-proxyActiveThreshold)).
 		Scan(&result).Error
 	if err != nil {
@@ -518,7 +518,7 @@ func (s *SqlStore) CleanupStaleProxies(ctx context.Context, inactivityDuration t
 	cutoffTime := time.Now().Add(-inactivityDuration)
 
 	result := s.db.
-		Where("last_seen < ?", cutoffTime).
+		Where(s.proxyLastSeenComparison("<"), cutoffTime).
 		Delete(&proxy.Proxy{})
 
 	if result.Error != nil {
@@ -531,4 +531,14 @@ func (s *SqlStore) CleanupStaleProxies(ctx context.Context, inactivityDuration t
 	}
 
 	return nil
+}
+
+// SQLite stores timestamps as text, so compare instants instead of local clock
+// strings. Existing proxy rows can contain different offsets after a timezone
+// change; PostgreSQL already compares timestamp values chronologically.
+func (s *SqlStore) proxyLastSeenComparison(operator string) string {
+	if s.db.Dialector.Name() == "sqlite" {
+		return "julianday(last_seen) " + operator + " julianday(?)"
+	}
+	return "last_seen " + operator + " ?"
 }

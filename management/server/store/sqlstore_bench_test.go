@@ -253,6 +253,9 @@ func connectDBforTest(ctx context.Context, dsn string) (*pgxpool.Pool, error) {
 }
 
 func setupBenchmarkDB(b testing.TB) (*SqlStore, func(), string) {
+	if testing.Short() {
+		b.Skip("container integration test; run without -short")
+	}
 	cleanup, dsn, err := testutil.CreatePostgresTestContainer()
 	if err != nil {
 		b.Fatalf("failed to create test container: %v", err)

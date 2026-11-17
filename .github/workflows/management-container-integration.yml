@@ -1,0 +1,40 @@
+name: Management Container Integration
+
+on:
+  workflow_dispatch:
+
+jobs:
+  integration:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        store: [sqlite, postgres]
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        with:
+          go-version-file: go.mod
+      - name: Test SQLite, Postgres and Redis integration
+        env:
+          NETBIRD_STORE_ENGINE: ${{ matrix.store }}
+          CGO_ENABLED: '1'
+          CI: 'true'
+          GIT_BRANCH: ${{ github.ref_name }}
+        run: go test -tags=devcert -timeout 20m ./management/... ./shared/management/...
+      - name: Benchmark full Management suite
+        env:
+          NETBIRD_STORE_ENGINE: ${{ matrix.store }}
+          CGO_ENABLED: '1'
+          CI: 'true'
+          GIT_BRANCH: ${{ github.ref_name }}
+        run: go test -tags=devcert -run='^$' -bench=. -timeout 20m ./management/... ./shared/management/...
+      - name: Benchmark HTTP APIs
+        env:
+          NETBIRD_STORE_ENGINE: ${{ matrix.store }}
+          CGO_ENABLED: '1'
+          CI: 'true'
+          GIT_BRANCH: ${{ github.ref_name }}
+        run: go test -tags=benchmark -run='^$' -bench=. -timeout 20m ./management/server/http/...

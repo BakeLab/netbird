@@ -62,6 +62,16 @@ func FromSqlTypesToSharedTypes(src reflect.Value, dst reflect.Value) error {
 		}
 
 		srcField := src.Elem().Field(i)
+		// RawMessage is an alias for jsontext.Value in newer Go versions.
+		// Match type identity, not its implementation-dependent reflected name.
+		if raw, ok := srcField.Interface().(json.RawMessage); ok {
+			if len(raw) != 0 {
+				if err := json.Unmarshal(raw, dstField.Addr().Interface()); err != nil {
+					return err
+				}
+			}
+			continue
+		}
 		srcFieldType := srcField.Type().String()
 		switch srcFieldType {
 		case "string":
@@ -94,14 +104,6 @@ func FromSqlTypesToSharedTypes(src reflect.Value, dst reflect.Value) error {
 			s := srcField.Interface().(sql.NullInt64)
 			if s.Valid {
 				dstField.SetInt(s.Int64)
-			}
-		case "json.RawMessage":
-			s := srcField.Interface().(json.RawMessage)
-			if len(s) == 0 {
-				continue
-			}
-			if err := json.Unmarshal(s, dstField.Addr().Interface()); err != nil {
-				return err
 			}
 		case "[]byte", "[]uint8":
 			s := srcField.Interface().([]byte)

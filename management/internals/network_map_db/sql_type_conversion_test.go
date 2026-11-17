@@ -251,3 +251,9 @@ type withUint8Slice struct {
 type uint8SliceTarget struct {
 	Field []string
 }
+
+func TestRawJSONRejectsMalformedData(t *testing.T) {
+	src := withRawJson{Blob: json.RawMessage(`{"Name":`)}
+	dst := fromJson{}
+	assert.Error(t, FromSqlTypesToSharedTypes(reflect.ValueOf(&src), reflect.ValueOf(&dst)))
+}

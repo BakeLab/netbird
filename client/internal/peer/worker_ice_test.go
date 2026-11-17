@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/netbirdio/ice/v4"
+	"github.com/BakeLab/ice/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
