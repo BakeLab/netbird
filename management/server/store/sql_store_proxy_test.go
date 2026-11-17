@@ -104,3 +104,35 @@ func TestSaveProxy_EnforcesAccountIDMatch(t *testing.T) {
 		}
 	})
 }
+
+func TestProxyCapabilitiesCompareTimestampInstants(t *testing.T) {
+	runTestForAllEnginesNoSqliteSeed(t, "", func(t *testing.T, engine string, store Store) {
+		ctx := context.Background()
+		for _, tc := range []struct {
+			name     string
+			lastSeen time.Time
+			active   bool
+		}{
+			{"fresh-negative-offset", time.Now().In(time.FixedZone("west", -12*60*60)), true},
+			{"stale-positive-offset", time.Now().Add(-time.Hour).In(time.FixedZone("east", 14*60*60)), false},
+		} {
+			t.Run(tc.name, func(t *testing.T) {
+				require.NoError(t, store.SaveProxy(ctx, &rpproxy.Proxy{
+					ID: tc.name, ClusterAddress: tc.name, Status: rpproxy.StatusConnected,
+					LastSeen: tc.lastSeen, Capabilities: rpproxy.Capabilities{Private: new(true)},
+				}))
+				capability := store.GetClusterSupportsPrivate(ctx, tc.name)
+				unanimous := store.GetClusterAllProxiesPrivate(ctx, tc.name)
+				if tc.active {
+					require.NotNil(t, capability)
+					assert.True(t, *capability)
+					require.NotNil(t, unanimous)
+					assert.True(t, *unanimous)
+				} else {
+					assert.Nil(t, capability)
+					assert.Nil(t, unanimous)
+				}
+			})
+		}
+	})
+}
