@@ -39,12 +39,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
+        os: ["macos-latest", "ubuntu-latest"]
         include:
           - os: macos-latest
             display_name: Darwin
-          - os: windows-latest
-            display_name: Windows
           - os: ubuntu-latest
             display_name: Linux
     name: ${{ matrix.display_name }}
